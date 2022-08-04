@@ -1,0 +1,48 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Assets.Code;
+
+public class Neutral : State<Director>
+{
+    private static Neutral _instance;
+    public static Neutral Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                new Neutral();
+            }
+
+            return _instance;
+        }
+    }
+
+    private Director owner;
+
+    public Neutral()
+    {
+        if (_instance != null)
+        {
+            return;
+        }
+
+        _instance = this;
+    }
+
+    public override void EnterState(Director _owener)
+    {
+
+    }
+
+    public override void ExitState(Director _owner)
+    {
+
+    }
+
+    public override void UpdateState(Director _owner)
+    {
+
+    }
+}

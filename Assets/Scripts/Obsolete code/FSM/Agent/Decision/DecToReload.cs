@@ -1,0 +1,15 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Assets.Code.FSM
+{
+    [CreateAssetMenu(menuName = "Agent/Decision/DecToReload")]
+    public class DecToReload : AgentDecision
+    {
+        public override bool Decide(AgentFSM agent)
+        {
+            return agent.AgentStats.selectedWeapon.IsUnloaded();
+        }
+    }
+}

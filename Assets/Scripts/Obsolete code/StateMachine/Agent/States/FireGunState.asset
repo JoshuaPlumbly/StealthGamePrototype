@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49be33d1bb9f37244a6d5c26c1801070, type: 3}
+  m_Name: FireGunState
+  m_EditorClassIdentifier: 
+  startActions: []
+  updateActions:
+  - {fileID: 11400000, guid: 47497be5e57f5d143bdafbf44a20687e, type: 2}
+  lateUpdateAction: []
+  exitAction: []
+  transitions:
+  - decision: {fileID: 11400000, guid: f1e65b1e8e5d69b488b08bb533955428, type: 2}
+    trueState: {fileID: 11400000}
+    falseState: {fileID: 11400000, guid: 419b785fc87f1994ea1c3cdb71c32049, type: 2}
+  - decision: {fileID: 11400000, guid: 1ff801df421fe4543a02a47a37c64170, type: 2}
+    trueState: {fileID: 11400000, guid: 951a87f94fe8dee428ba479ad5deeb87, type: 2}
+    falseState: {fileID: 11400000}
