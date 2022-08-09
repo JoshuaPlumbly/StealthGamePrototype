@@ -1,20 +1,19 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class Grid : MonoBehaviour
 {
     [SerializeField] LayerMask unwalkableMask;
     [SerializeField] Vector2 gridWorldSize;
     [SerializeField] float nodeRadius;
-    [SerializeField] Node[,] grid;
+    [SerializeField] PathNode[,] grid;
     [SerializeField] TerrainType[] walkableTerrain;
     [SerializeField] int obstacleProxPenalty = 10;
 
     [Header("Draw Gizmo")]
-    [SerializeField]
-    bool drawArea;
+    [SerializeField] bool drawArea;
     [SerializeField] bool drawGrid;
     [SerializeField] bool drawPath;
     [SerializeField] Color areaColour = Color.blue;
@@ -27,7 +26,8 @@ public class Grid : MonoBehaviour
     public Dictionary<int, int> walkableTerrainDictionary = new Dictionary<int, int>();
 
     float nodeDiameter;
-    int gridSizeX, gridSizeY;
+    int gridSizeX;
+    int gridSizeY;
 
     int penaltyMin = int.MaxValue;
     int penaltyMax = int.MinValue;
@@ -38,6 +38,11 @@ public class Grid : MonoBehaviour
     }
 
     private void Awake()
+    {
+        Generate();
+    }
+
+    public void Generate()
     {
         nodeDiameter = nodeRadius * 2;
         gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
@@ -55,9 +60,9 @@ public class Grid : MonoBehaviour
     /// <summary>
     /// Creates a grid of nodes.
     /// </summary>
-    void CreateGrid()
+    public void CreateGrid()
     {
-        grid = new Node[gridSizeX, gridSizeY];
+        grid = new PathNode[gridSizeX, gridSizeY];
         Vector3 worldBottomLeft = transform.position - Vector3.right * gridWorldSize.x / 2 - Vector3.forward * gridWorldSize.y / 2;
 
         for (int x = 0; x < gridSizeX; x++)
@@ -90,14 +95,14 @@ public class Grid : MonoBehaviour
                 }
 
                 // Add a new node to the grid.
-                grid[x, y] = new Node(walkable, worldPoint, x, y, penalty);
+                grid[x, y] = new PathNode(walkable, worldPoint, x, y, penalty);
             }
 
             //BlurPenaltyMap(3);
         }
     }
 
-    public Node NodeFromWorldPoint(Vector3 worldPos)
+    public PathNode NodeFromWorldPoint(Vector3 worldPos)
     {
         float percentX = (worldPos.x + gridWorldSize.x / 2) / gridWorldSize.x;
         float percentY = (worldPos.z + gridWorldSize.y / 2) / gridWorldSize.y;
@@ -116,10 +121,10 @@ public class Grid : MonoBehaviour
     /// </summary>
     /// <param name="n"></param>
     /// <returns></returns>
-    public List<Node> GetNeighbours(Node n)
+    public List<PathNode> GetNeighbours(PathNode n)
     {
         // Create a list for neighbouring nodes.
-        List<Node> neighbours = new List<Node>();
+        List<PathNode> neighbours = new List<PathNode>();
 
         // Add neighbouring nodes to a list.
         for (int x = -1; x <= 1; x++)
@@ -130,8 +135,8 @@ public class Grid : MonoBehaviour
                 if (x == 0 && y == 0)
                     continue;
 
-                int checkX = n.GridX + x;
-                int checkY = n.GridY + y;
+                int checkX = n.X + x;
+                int checkY = n.Y + y;
 
                 if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY)
                 {
@@ -201,10 +206,9 @@ public class Grid : MonoBehaviour
         }
     }
 
-    public List<Node> path;
+    public List<PathNode> path;
     private void OnDrawGizmos()
     {
-
         // Draw grid size
         Gizmos.color = areaColour;
         Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.y));
@@ -212,7 +216,7 @@ public class Grid : MonoBehaviour
         // Draw grid nodes
         if (drawGrid && grid != null)
         {
-            foreach (Node n in grid)
+            foreach (PathNode n in grid)
             {
                 Gizmos.color = Color.Lerp(lowWeightColour, highWeightColour, Mathf.InverseLerp(penaltyMin, penaltyMax, n.Penalty));
 
@@ -227,6 +231,22 @@ public class Grid : MonoBehaviour
 
                 Gizmos.DrawCube(n.WorldPosition, Vector3.one * (nodeDiameter - 0.1f));
             }
+        }
+    }
+}
+
+[CustomEditor(typeof(Grid))]
+public class GridEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+
+        Grid grid = (Grid)target;
+        
+        if (GUILayout.Button("Create Grid"))
+        {
+            grid.Generate();
         }
     }
 }

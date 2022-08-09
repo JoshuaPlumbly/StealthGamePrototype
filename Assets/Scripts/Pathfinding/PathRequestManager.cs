@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System;
 using System.Threading;
 
 [RequireComponent(typeof(Grid))]
@@ -49,33 +48,5 @@ public class PathRequestManager : MonoBehaviour
         {
             results.Enqueue(result);
         }
-    }
-}
-
-public struct PathResult
-{
-    public Vector3[] Path;
-    public bool Success;
-    public Action<Vector3[], bool> Callback;
-
-    public PathResult(Vector3[] path, bool success, Action<Vector3[], bool> callback)
-    {
-        this.Path = path;
-        this.Success = success;
-        this.Callback = callback;
-    }
-}
-
-public struct PathRequest
-{
-    public Vector3 PathStart;
-    public Vector3 PathEnd;
-    public Action<Vector3[], bool> Callback;
-
-    public PathRequest(Vector3 start, Vector3 end, Action<Vector3[], bool> callback)
-    {
-        PathStart = start;
-        PathEnd = end;
-        Callback = callback;
     }
 }

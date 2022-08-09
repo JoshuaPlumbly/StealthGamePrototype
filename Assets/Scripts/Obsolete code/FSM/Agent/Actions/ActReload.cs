@@ -10,7 +10,7 @@ namespace Assets.Code.FSM
         public override void Act(AgentFSM agent)
         {
             // Reload selected weapon.
-            agent.AgentStats.selectedWeapon.StartReload(0.0f);
+            agent.AgentStats.selectedWeapon.TriggerReload();
         }
     }
 }

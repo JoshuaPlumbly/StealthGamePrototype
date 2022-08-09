@@ -19,7 +19,7 @@ public class ProgressTracker : MonoBehaviour
     private void OnDestroy()
     {
         GuardAgent.Alerted -= () => Alerts++;
-        GuardAgent.Died += () => Kills++;
+        GuardAgent.Died -= () => Kills++;
     }
 
     public PlayResults CurrentProgress()
@@ -27,7 +27,7 @@ public class ProgressTracker : MonoBehaviour
         PlayResults playResults = new PlayResults();
         playResults.kills = Kills;
         playResults.alerts = Alerts;
-        playResults.ammo = Gun.TotalAmmo();
+        playResults.ammo = Gun.GetTotalAmmo();
         playResults.time = Timer.RemainingTime();
 
         return playResults;

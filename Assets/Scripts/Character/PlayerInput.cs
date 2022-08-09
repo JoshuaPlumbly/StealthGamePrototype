@@ -16,21 +16,19 @@ public class PlayerInput : MonoBehaviour
         movement = GetComponent<PlayerMovement>();
         ammoCounterUI = GetComponentInChildren<AmmoCounterUI>();
 
-        gun.StartReload(0.0f);
+        gun.TriggerReload();
     }
 
     private void Update()
     {
         if (Input.GetButton("Fire"))
         {
-            gun.FireTrigger();
-            ammoCounterUI.UpdateUI();
+            gun.PrimaryUse();
         }
 
         if (Input.GetButtonDown("Reload"))
         {
-            gun.FinishReload();
-            ammoCounterUI.UpdateUI();
+            gun.TriggerReload();
         }
 
         if (Input.GetButton("Horizontal") || Input.GetButton("Vertical"))

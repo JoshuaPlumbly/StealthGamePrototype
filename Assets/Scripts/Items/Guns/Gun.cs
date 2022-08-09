@@ -1,17 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Assets.Code;
-using System;
+using System.Collections;
 
-public class Gun : MonoBehaviour
+public class Gun : MonoBehaviour, IWeildReloadable
 {
     [SerializeField] protected int firedBy;
     [SerializeField] protected Transform barrel;
     [SerializeField] protected GameObject prefab;
     [SerializeField] protected float nosie;
     [SerializeField] protected float secPerRound;
-    [SerializeField] private int currentAmmo;
+    [SerializeField] protected float secToReload;
+    [SerializeField] private int unloadedAmmo;
     [SerializeField] protected int loadedAmmo;
     [SerializeField] protected int maxLoadedAmmo;
 
@@ -19,39 +18,14 @@ public class Gun : MonoBehaviour
     protected float timeLastFiredAt;
 
     public bool IsFullyLoaded() { return loadedAmmo >= maxLoadedAmmo ; }
+    public int GetTotalAmmo() { return loadedAmmo + unloadedAmmo; }
+    public int GetUnloadedAmmo() => unloadedAmmo;
+    public int GetLoadedAmmo() => loadedAmmo;
     public bool IsLoaded() { return loadedAmmo > 0; }
     public bool IsUnloaded() { return !IsLoaded(); }
     public bool CooldownFinished() { return Time.time > timeLastFiredAt + secPerRound; }
 
-    public event System.Action FiredRound;
-
-    #region Encapulated variables
-    public int CurrentAmmo
-    {
-        get
-        {
-            return currentAmmo;
-        }
-
-        set
-        {
-            currentAmmo = value;
-        }
-    }
-
-    public int Clip
-    {
-        get
-        {
-            return loadedAmmo;
-        }
-
-        set
-        {
-            loadedAmmo = value;
-        }
-    }
-    #endregion
+    public event System.Action RefreshedAmmoCount;
 
     private void Start()
     {
@@ -61,13 +35,13 @@ public class Gun : MonoBehaviour
         PoolManager.Instance.CreatePool(prefab, 5);
     }
 
-    public virtual void FireTrigger()
+    public virtual void PrimaryUse()
     {
-        if (IsLoaded() && Time.time > timeLastFiredAt)
+        if (IsLoaded() && CooldownFinished())
         {
             timeLastFiredAt = Time.time;
             loadedAmmo--;
-            FiredRound?.Invoke();
+            RefreshedAmmoCount?.Invoke();
             Shoot();
         }
     }
@@ -79,26 +53,48 @@ public class Gun : MonoBehaviour
         obj.SetActive(true);
     }
 
+    private IEnumerator _reloadCoroutine = null;
     /// <summary>
     /// Start reloading clip.
     /// </summary>
     /// <param name="_reloadTime"></param>
-    public void StartReload(float _reloadTime)
+    public void TriggerReload()
     {
-        Invoke("FinishReload", _reloadTime);
+        IEnumerator Reload()
+        {
+            float t = 0f;
+
+            while (t < secToReload)
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
+
+            FinishReload();
+            _reloadCoroutine = null;
+        }
+
+        if (_reloadCoroutine != null)
+            return;
+
+        _reloadCoroutine = Reload();
+
+        StartCoroutine(_reloadCoroutine);
     }
 
     /// <summary>
     /// Finish reloading clip.
     /// </summary>
     /// <returns></returns>
-    public void FinishReload()
+    private void FinishReload()
     {
         int reloadAmont = maxLoadedAmmo - loadedAmmo;
-        reloadAmont = currentAmmo - reloadAmont >= 0 ? reloadAmont : currentAmmo;
+        reloadAmont = unloadedAmmo - reloadAmont >= 0 ? reloadAmont : unloadedAmmo;
         loadedAmmo += reloadAmont;
-        currentAmmo -= reloadAmont;
+        unloadedAmmo -= reloadAmont;
+        RefreshedAmmoCount?.Invoke();
     }
-
-    public int TotalAmmo() { return loadedAmmo + currentAmmo; }
 }
+
+public interface IWeildable { void PrimaryUse(); }
+public interface IWeildReloadable : IWeildable { void TriggerReload(); }

@@ -31,7 +31,7 @@ public class Chase : State<GuardAgent>
             if (owner.CanSeePlayer() && !owner.Gun.IsUnloaded())
             {
                 owner.Gun.transform.LookAt(owner.Player);
-                owner.Gun.FireTrigger();
+                owner.Gun.PrimaryUse();
             }
         }
 
@@ -44,7 +44,7 @@ public class Chase : State<GuardAgent>
 
         // Reload when gun is empty.
         if (owner.Gun.IsUnloaded())
-            owner.Gun.StartReload(owner.ReloadTime);
+            owner.Gun.TriggerReload();
     }
 
 }

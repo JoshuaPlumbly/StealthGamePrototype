@@ -21,20 +21,20 @@ public class Pathfinding
         Vector3[] waypoints = new Vector3[0];
         bool pathSuccess = false;
 
-        Node startNode = _grid.NodeFromWorldPoint(request.PathStart);
-        Node targetNode = _grid.NodeFromWorldPoint(request.PathEnd);
-        startNode.Parent = startNode;
+        PathNode startNode = _grid.NodeFromWorldPoint(request.PathStart);
+        PathNode targetNode = _grid.NodeFromWorldPoint(request.PathEnd);
+        startNode.Connection = startNode;
 
 
         if (startNode.Walkable && targetNode.Walkable)
         {
-            Heap<Node> openSet = new Heap<Node>(_grid.MaxSize);
-            HashSet<Node> closedSet = new HashSet<Node>();
+            Heap<PathNode> openSet = new Heap<PathNode>(_grid.MaxSize);
+            HashSet<PathNode> closedSet = new HashSet<PathNode>();
             openSet.Add(startNode);
 
             while (openSet.Count > 0)
             {
-                Node currentNode = openSet.RemoveFirst();
+                PathNode currentNode = openSet.RemoveFirst();
                 closedSet.Add(currentNode);
 
                 // Detect if a path to the target node has been found.
@@ -47,7 +47,7 @@ public class Pathfinding
                 }
 
                 // Check neighbouring nodes.
-                foreach (Node neighbour in _grid.GetNeighbours(currentNode))
+                foreach (PathNode neighbour in _grid.GetNeighbours(currentNode))
                 {
                     // Move on if neighbour is not walkable or already checked.
                     if (!neighbour.Walkable || closedSet.Contains(neighbour))
@@ -55,13 +55,13 @@ public class Pathfinding
                         continue;
                     }
 
-                    int newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour) + neighbour.Penalty;
+                    int newMovementCostToNeighbour = currentNode.G + currentNode.GetDistanceTo(neighbour) + neighbour.Penalty;
 
-                    if (newMovementCostToNeighbour < neighbour.GCost || !openSet.Contains(neighbour))
+                    if (newMovementCostToNeighbour < neighbour.G || !openSet.Contains(neighbour))
                     {
-                        neighbour.GCost = newMovementCostToNeighbour;
-                        neighbour.HCost = GetDistance(neighbour, targetNode);
-                        neighbour.Parent = currentNode;
+                        neighbour.G = newMovementCostToNeighbour;
+                        neighbour.H = neighbour.GetDistanceTo(targetNode);
+                        neighbour.Connection = currentNode;
 
                         if (!openSet.Contains(neighbour))
                             openSet.Add(neighbour);
@@ -84,16 +84,16 @@ public class Pathfinding
     }
 
 
-    Vector3[] RetracePath(Node startNode, Node endNode)
+    Vector3[] RetracePath(PathNode startNode, PathNode endNode)
     {
-        List<Node> path = new List<Node>();
-        Node currentNode = endNode;
+        List<PathNode> path = new List<PathNode>();
+        PathNode currentNode = endNode;
 
         while (currentNode != startNode)
         {
             // Add node to path and move on to the parent.
             path.Add(currentNode);
-            currentNode = currentNode.Parent;
+            currentNode = currentNode.Connection;
         }
 
         // Simplify path and reverse.
@@ -104,7 +104,7 @@ public class Pathfinding
 
     }
 
-    Vector3[] SimplifyPath(List<Node> path)
+    Vector3[] SimplifyPath(List<PathNode> path)
     {
         List<Vector3> waypoints = new List<Vector3>();
         Vector2 directionOld = Vector2.zero;
@@ -112,7 +112,7 @@ public class Pathfinding
         for (int i = 1; i < path.Count; i++)
         {
             // Find the direction between previous and current waypoints.
-            Vector2 directionNew = new Vector2(path[i - 1].GridX - path[i].GridX, path[i - 1].GridY - path[i].GridY);
+            Vector2 directionNew = new Vector2(path[i - 1].X - path[i].X, path[i - 1].Y - path[i].Y);
 
             // Add waypoint to a list when a new direction is detected.
             if (directionNew != directionOld)
@@ -125,16 +125,5 @@ public class Pathfinding
         }
 
         return waypoints.ToArray();
-    }
-
-    int GetDistance(Node nodeA, Node nodeB)
-    {
-        int dstX = Mathf.Abs(nodeA.GridX - nodeB.GridX);
-        int dstY = Mathf.Abs(nodeA.GridY - nodeB.GridY);
-
-        if (dstX > dstY)
-            return 14 * dstY + 10 * (dstX - dstY);
-
-        return 14 * dstX + 10 * (dstY - dstX);
     }
 }

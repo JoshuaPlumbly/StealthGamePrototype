@@ -77,9 +77,6 @@ namespace Assets.Code.FSM
 
             // Set up pool
             PoolManager.Instance.CreatePool(guardPrefab, 4);
-
-            // Set up lisenors
-            MyEventSystem.Instance.RegisterListener<CallBackUp>(BackupLisner);
         }
 
         protected virtual void Update()
@@ -102,11 +99,6 @@ namespace Assets.Code.FSM
         public bool CheckIfCountDownElaapsed(float duration)
         {
             return (Time.time - stateStartTime < duration);
-        }
-
-        public void BackupLisner(CallBackUp obj)
-        {
-            TransitionToState(backUp);
         }
     }
 }

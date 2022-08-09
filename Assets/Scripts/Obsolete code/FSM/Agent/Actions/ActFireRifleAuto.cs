@@ -14,7 +14,7 @@ namespace Assets.Code.FSM
 
         public void FireShot(AgentFSM agent)
         {
-            agent.AgentStats.selectedWeapon.FireTrigger();
+            agent.AgentStats.selectedWeapon.PrimaryUse();
         }
     }
 }

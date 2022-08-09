@@ -5,18 +5,17 @@ using UnityEngine.UI;
 
 public class AmmoCounterUI : MonoBehaviour
 {
-    [SerializeField] private Text ammoUI;
+    [SerializeField] private Text _counterText;
     private Gun gun;
 
     private void Awake()
     {
         gun = GetComponentInChildren<Gun>();
-        UpdateUI();
+        gun.RefreshedAmmoCount += Refresh;
     }
 
-    public void UpdateUI ()
+    public void Refresh ()
     {
-        ammoUI.text = gun.Clip.ToString() + " / " + gun.CurrentAmmo.ToString();
+        _counterText.text = gun.GetLoadedAmmo().ToString() + " / " + gun.GetUnloadedAmmo().ToString();
 	}
-	
 }
