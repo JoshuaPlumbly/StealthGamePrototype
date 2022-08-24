@@ -1,4 +1,4 @@
-﻿using Assets.Code.FSM;
+﻿using Assets.Code.StateMachine;
 using System;
 using System.Collections.Generic;
 using System.Linq;

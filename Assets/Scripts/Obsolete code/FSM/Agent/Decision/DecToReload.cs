@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Code.FSM
+namespace Assets.Code.StateMachine
 {
     [CreateAssetMenu(menuName = "Agent/Decision/DecToReload")]
     public class DecToReload : AgentDecision

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.Code;
+using Assets.Code.StateMachine;
 
 public class Reload : State<GuardAgent>
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Code.FSM
+namespace Assets.Code.StateMachine
 {
     [CreateAssetMenu(menuName = "StateMachine/Action/ChaseTarget")]
     public class ActChaseTarget : AgentAction

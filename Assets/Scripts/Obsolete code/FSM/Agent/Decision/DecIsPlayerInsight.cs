@@ -7,7 +7,7 @@ using UnityEngine;
  * Unity. (2018). Decisions and Looking - Unity. [online] Available at: https://unity3d.com/learn/tutorials/topics/navigation/decisions-and-looking?playlist=17105 [Accessed 29 Oct. 2018].
  */
 
-namespace Assets.Code.FSM
+namespace Assets.Code.StateMachine
 {
     [CreateAssetMenu(menuName = "StateMachine/Decision/PlayerInsight")]
     public class DecIsPlayerInsight : AgentDecision  {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Code.FSM
+namespace Assets.Code.StateMachine
 {
     [System.Serializable]
     public class DirectorTransition

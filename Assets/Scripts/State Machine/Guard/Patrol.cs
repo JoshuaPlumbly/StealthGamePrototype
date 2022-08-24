@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Code;
+using Assets.Code.StateMachine;
 
 [System.Serializable]
 public class Patrol : State<GuardAgent>
@@ -10,12 +11,13 @@ public class Patrol : State<GuardAgent>
     public Transform player;
     public float timeAt;
 
-    public static event System.Action<GuardAgent> Detected;
+    //public static event System.Action<GuardAgent> Detected;
 
     public override void EnterState(GuardAgent owner)
     {
         owner.NavAgent.SetDestination(owner.PatrolPoints[0]);
         owner.NavAgent.Speed = owner.PatrollingWalkSpeed;
+        owner.NavAgent.Play();
 
         _patrolPointIndex = 0;
         player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -23,22 +25,22 @@ public class Patrol : State<GuardAgent>
 
     public override void ExitState(GuardAgent owner)
     {
-        owner.NavAgent.StopMoving();
+        owner.NavAgent.Pause();
     }
 
     public override void UpdateState(GuardAgent owner)
     {
         // Check if agent has reached the current waypoint.
-        if (owner.NavAgent.RemainingDistance < owner.StopingDistance)
+        if (owner.NavAgent.ReachedWaypoint())
         {
             _patrolPointIndex = (_patrolPointIndex + 1) % owner.PatrolPoints.Length;
             owner.NavAgent.SetDestination(owner.PatrolPoints[_patrolPointIndex].position);
-            owner.NavAgent.StartMoving();
+            owner.NavAgent.Play();
         }
 
-        if (owner.CanSeePlayer())
-        {
-            owner.StateMachine.ChanageState(owner.CallForBackup);
-        }
+        //if (owner.CanSeePlayer)
+        //{
+        //    owner.StateMachine.ChanageState(owner.CallForBackup);
+        //}
     }
 }

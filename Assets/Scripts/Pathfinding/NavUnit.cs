@@ -6,60 +6,86 @@ public class NavUnit : MonoBehaviour
 {
     public const float _minPathUpdateTime = 0.2f;
     public const float _pathUpdateMoveThreshold = 0.5f;
+    public float _stopingDistance = 1f;
 
     public Vector3 Destination { get; private set; }
-    public float Speed { get; set; } = 7.0f;
-    public float TurnSpeed { get; set; } = 10f;
-    public float TurnDst { get; set; } = 0.1f;
-    public float TargetAccuracy { get; set; }
-    public float StoppingDst { get; set; } = 10.0f;
-    public float RemainingDistance { get; private set; }
+    public float Speed = 7.0f;
+    public float AngularSpeed = 10f;
+    public float TurnDistance = 0.1f;
+    public float TargetAccuracy;
+    public float StoppingDistance = 10.0f;
 
     [SerializeField] private bool _drawPath;
 
     private Path _path;
     private Rigidbody _ridigbody;
-
-    public void SetDestination(Vector3 destination)
-    {
-        Destination = destination;
-    }
-
-    public void SetDestination(Transform destination)
-    {
-        SetDestination(destination.position);
-    }
+    private Vector3 _currentWaypoint;
+    private int _currentWaypointIndex;
+    private bool _isPlaying;
+    private bool _hasPath;
 
     private void Awake()
     {
         _ridigbody = GetComponent<Rigidbody>();
     }
 
-    public void StartMoving()
+    private void Update()
     {
-        StartCoroutine(UpdatePath_FixedDestination());
+        if (!_isPlaying)
+            return;
+
+        MoveAlongPathToDestination();
     }
 
-    public void StopMoving()
+    public void SetDestination(Vector3 destination)
     {
-        StopCoroutine(UpdatePath_FixedDestination());
-        StopCoroutine(FollowPath());
+        if (destination == null)
+        {
+            Debug.LogWarning($"{name} : SetDestination was given a null Vector3.");
+            return;
+        }
+
+        Destination = destination;
+    }
+
+    public void SetDestination(Transform destination)
+    {
+        if (destination == null)
+        {
+            Debug.LogWarning($"{name} : SetDestination was given a null Transform.");
+            return;
+        }
+
+        SetDestination(destination.position);
+    }
+
+    public void Play()
+    {
+        _isPlaying = true;
+        StartCoroutine(FindPathToDestination());
+    }
+
+    public void Pause()
+    {
+        _isPlaying = false;
+        StopCoroutine(FindPathToDestination());
     }
 
     public void OnPathFound(Vector3[] waypoints, bool pathSuccessful)
     {
-        if (pathSuccessful)
-        {
-            // Create a new path using a list of waypoints.
-            _path = new Path(waypoints, transform.position, TurnDst, StoppingDst);
+        if (!pathSuccessful)
+            return;
+        
+        // Create a new path using a list of waypoints.
+        _path = new Path(waypoints, transform.position, TurnDistance, StoppingDistance);
+        SetWaypoint(0);
 
-            // Start moving towards the destination.
-            StopCoroutine("FollowPath");
-            StartCoroutine("FollowPath");
-        }
+        //// Start moving towards the destination.
+        //StopCoroutine("FollowPath");
+        //StartCoroutine("FollowPath");
     }
 
-    IEnumerator UpdatePath_FixedDestination()
+    IEnumerator FindPathToDestination()
     {
         // Make sure that time sine the level loaded is over 0.3 secounds.
         if (Time.timeSinceLevelLoad < 0.3f)
@@ -69,93 +95,82 @@ public class NavUnit : MonoBehaviour
 
         // Use the path request manager to find a new path to the destation.
         PathRequestManager.RequestPath(new PathRequest(transform.position, Destination, OnPathFound));
-
-        // Create variables for while loop.
-        float sqrMoveThreshold = _pathUpdateMoveThreshold * _pathUpdateMoveThreshold;
-        Vector3 targetPosOld = Destination;
-
-        while (true)
-        {
-            // Only update after a certain amount of time.
-            yield return new WaitForSeconds(_minPathUpdateTime);
-
-            // Only move when destaination has moved.
-            if ((Destination - targetPosOld).sqrMagnitude > sqrMoveThreshold)
-            {
-                PathRequestManager.RequestPath(new PathRequest(transform.position, Destination, OnPathFound));
-                targetPosOld = Destination;
-            }
-        }
     }
 
-    IEnumerator FollowPath()
+    private void MoveAlongPathToDestination()
     {
-        bool followingPath = true;
-        int pathIndex = 0;
-        transform.LookAt(_path.lookPoints[0]);
+        if (_currentWaypoint.Equals(null))
+            return;
 
-        float speedPercent = 1;
-
-        while (followingPath)
+        if (ReachedWaypoint())
         {
-            Vector2 pos2D = new Vector2(transform.position.x, transform.position.z);
-
-            // Run when object has reached a waypoint.
-            while (_path.turnBoundaries[pathIndex].HasCrossedLine(pos2D))
-            {
-                // Find out if object has reached the last waypoint.
-                if (pathIndex == _path.finishLineIndex)
-                {
-                    // Stop following path.
-                    followingPath = false;
-                    break;
-                }
-                else
-                {
-                    // Chanage destaination to next waypoint.
-                    pathIndex++;
-                }
-            }
-
-            if (followingPath)
-            {
-                // Calulate distance to next point.
-                float dstToEndPoint = Vector3.Distance(transform.position, _path.lookPoints[pathIndex]);
-
-                // Calulate distance to end point.
-                for (int i = pathIndex; i < _path.lookPoints.Length - 1; i++)
-                {
-                    dstToEndPoint += Vector3.Distance(_path.lookPoints[i], _path.lookPoints[i + 1]);
-                }
-
-                RemainingDistance = dstToEndPoint;
-
-                // Slow down when close to the target.
-                if (pathIndex >= _path.slowDownIndex && StoppingDst > 0)
-                {
-                    speedPercent = Mathf.Clamp01(_path.turnBoundaries[_path.finishLineIndex].DistanceFromPoint(pos2D) / StoppingDst);
-                    if (dstToEndPoint < TargetAccuracy)
-                    {
-                        followingPath = false;
-                    }
-                }
-
-                // Move towards waypoint.
-                //Quaternion targetRotation = Quaternion.LookRotation(path.lookPoints[pathIndex] - transform.position);
-                Quaternion targetRotation = Quaternion.LookRotation(_path.lookPoints[pathIndex] - transform.position);
-                targetRotation.x = 0.0f;
-                targetRotation.z = 0.0f;
-                _ridigbody.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * TurnSpeed);
-                _ridigbody.MovePosition(_ridigbody.position + transform.forward * Time.deltaTime * Speed * speedPercent);
-            }
-
-            yield return null;
+            if (IsFollowingLastWaypoint())
+                Pause();
+            else
+                SetWaypoint(_currentWaypointIndex + 1);
         }
+
+        Vector3 targetDirection = _currentWaypoint - transform.position;
+        targetDirection.y = 0;
+        Vector3.Normalize(targetDirection);
+
+        Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
+        Quaternion rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * AngularSpeed);
+
+        _ridigbody.MoveRotation(rotation);
+        _ridigbody.MovePosition(transform.position + (transform.forward * Time.deltaTime * Speed));
+    }
+
+    private void SetWaypoint(int pathIndex)
+    {
+        if (pathIndex < 0 || pathIndex >= _path.WaypointCount)
+        {
+            Debug.LogWarning($"{name} waypoint has been set to an out of range number");
+            return;
+        }
+
+        _currentWaypointIndex = pathIndex;
+        _currentWaypoint = _path._wayPoints[pathIndex];
+    }
+
+    public bool IsFollowingLastWaypoint()
+    {
+        if (_path.Equals(null))
+            return false;
+
+        return _path.WaypointCount == _currentWaypointIndex;
+    }
+
+    public float DistanceToCurrentWaypoint()
+    {
+        return Vector3.Distance(transform.position, _currentWaypoint);
+    }
+
+    public float RemainingDistance() {
+
+        // Calulate distance to next point.
+        float remainingDistance = DistanceToCurrentWaypoint();
+
+        // Calulate distance to end point.
+        for (int i = _currentWaypointIndex; i < _path._wayPoints.Length - 1; i++)
+        {
+            remainingDistance += Vector3.Distance(_path._wayPoints[i], _path._wayPoints[i + 1]);
+        }
+
+        return remainingDistance;
+    }
+
+    public bool ReachedWaypoint()
+    {
+        if (_path == null || _path.WaypointCount == 0)
+            return false;
+
+        return DistanceToCurrentWaypoint() < _stopingDistance;
     }
 
     public void OnDrawGizmos()
     {
-        if (_drawPath = _path != null)
+        if (_drawPath && _path != null)
         {
             _path.DrawWithGizmos();
         }

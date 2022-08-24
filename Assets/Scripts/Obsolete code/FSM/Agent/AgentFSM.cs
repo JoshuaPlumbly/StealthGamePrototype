@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Assets.Code.FSM
+namespace Assets.Code.StateMachine
 {
     public class AgentFSM : MonoBehaviour
     {

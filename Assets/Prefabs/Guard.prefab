@@ -115,10 +115,11 @@ MonoBehaviour:
   barrel: {fileID: 4680812977949778}
   prefab: {fileID: 1746132999613850, guid: fbb82b351a3f2774a8178dc697c206f5, type: 3}
   nosie: 0
-  rof: 0.2
-  ammmo: 90
-  clip: 30
-  clipSize: 30
+  secPerRound: 0
+  secToReload: 0
+  unloadedAmmo: 0
+  loadedAmmo: 0
+  maxLoadedAmmo: 0
 --- !u!1 &1288409744955116
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,6 +150,7 @@ Transform:
   m_Children:
   - {fileID: 4925141427544588}
   - {fileID: 4382442991929494}
+  - {fileID: 830601653942317991}
   m_Father: {fileID: 4944037414884136}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -166,6 +168,7 @@ GameObject:
   - component: {fileID: 114249968526736882}
   - component: {fileID: 4058100648043324115}
   - component: {fileID: 5414680487709999334}
+  - component: {fileID: 7929636906251344599}
   m_Layer: 0
   m_Name: Guard
   m_TagString: Guard
@@ -219,7 +222,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  stopingDistance: 2
+  <StopingDistance>k__BackingField: 0.5
   drawPath: 0
   reloadTime: 0
   minShootAt: 0
@@ -228,8 +231,8 @@ MonoBehaviour:
   maxShootFor: 0
   wantedLocation: {fileID: 0}
   alarmSpeed: 0
-  alarmPullDst: 3
-  despawnBody: 0.5
+  <AlarmPullDst>k__BackingField: 8
+  <DespawnTime>k__BackingField: 8
   <PatrollingWalkSpeed>k__BackingField: 6
 --- !u!54 &54979220367323810
 Rigidbody:
@@ -287,6 +290,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthBar: {fileID: 114640558364725568}
+--- !u!114 &7929636906251344599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1331917402849862}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c4a0b64b27716d4a88cddfeb9d7d9eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _visionOrigin: {fileID: 830601653942317991}
+  _sightDistance: 6
+  _sightAngleDOT: 0.38
+  Test: 0
 --- !u!1 &1355565790107418
 GameObject:
   m_ObjectHideFlags: 0
@@ -958,3 +977,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c89ec0f6ea4ad374daf8ff5075010ae0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &5510226338087252960
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 830601653942317991}
+  m_Layer: 0
+  m_Name: VisionOrigion
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &830601653942317991
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5510226338087252960}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4947436902965050}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}

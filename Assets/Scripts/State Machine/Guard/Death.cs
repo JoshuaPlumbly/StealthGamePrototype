@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Assets.Code;
+using Assets.Code.StateMachine;
 
 public class Death : State<GuardAgent>
 {
@@ -34,7 +34,7 @@ public class Death : State<GuardAgent>
     public override void EnterState(GuardAgent _owner)
     {
         // Stop moving and fall down.
-        _owner.NavAgent.StopMoving();
+        _owner.NavAgent.Pause();
         _owner.RididBody.freezeRotation = false;
         _owner.transform.rotation *= Quaternion.Euler(Random.insideUnitSphere.normalized * 20.0f);
         _owner.RididBody.AddForce(Vector3.forward * Random.Range(12f, 16f));

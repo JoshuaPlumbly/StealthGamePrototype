@@ -1,4 +1,4 @@
-﻿using Assets.Code.FSM;
+﻿using Assets.Code.StateMachine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using UnityEngine.AI;
 using Assets.Code;
 using Assets.Code.NPC;
 
-namespace Assets.Code.FSM
+namespace Assets.Code.StateMachine
 {
     [CreateAssetMenu(menuName = "Agent/State")]
     public class AgentState : ScriptableObject
